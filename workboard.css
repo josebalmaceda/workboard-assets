@@ -79,7 +79,7 @@ input,select,textarea{font-family:inherit}
   font-weight:500;
 }
 .sb-item:hover{background:#F2F3F5;color:var(--navy)}
-.sb-item.active{background:var(--navy);color:#fff}
+.sb-item.active{background:#F7931E;color:#fff}
 .sb-item.active svg{stroke:#fff}
 
 /* Sidebar footer */
@@ -206,7 +206,7 @@ input,select,textarea{font-family:inherit}
   color:var(--text);font-size:13px;font-family:inherit;
   outline:none;transition:border-color .15s;
 }
-.wb-field input:focus,.wb-field select:focus,.wb-field textarea:focus{border-color:var(--orange2)}
+.wb-field input:focus,.wb-field select:focus,.wb-field textarea:focus{border-color:#F7931E}
 .wb-field textarea{resize:vertical;min-height:70px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
@@ -236,7 +236,7 @@ input,select,textarea{font-family:inherit}
 }
 .wb-sp{
   width:36px;height:36px;border:3px solid var(--border);
-  border-top-color:var(--orange2);border-radius:50%;
+  border-top-color:#F7931E;border-radius:50%;
   animation:wb-spin .7s linear infinite;
 }
 @keyframes wb-spin{to{transform:rotate(360deg)}}
@@ -277,7 +277,7 @@ input,select,textarea{font-family:inherit}
 #wb-bell-btn{position:relative;flex-shrink:0}
 #wb-bdot{
   position:absolute;top:4px;right:4px;width:8px;height:8px;
-  border-radius:50%;background:var(--orange);border:1.5px solid #fff;display:none;
+  border-radius:50%;background:#F7931E;border:1.5px solid #fff;display:none;
 }
 #wb-np{
   display:none;position:fixed;top:60px;right:16px;width:310px;
@@ -292,7 +292,7 @@ input,select,textarea{font-family:inherit}
   font-size:12px;width:160px;font-family:inherit;outline:none;
   background:var(--surface);transition:border-color .15s;
 }
-#wb-si:focus{border-color:var(--orange2);background:var(--white)}
+#wb-si:focus{border-color:#F7931E;background:var(--white)}
 
 /* ── Empty state ── */
 .wb-empty{

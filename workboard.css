@@ -151,8 +151,8 @@ input,select,textarea{font-family:inherit}
 /* ── Status pills ── */
 .pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;display:inline-block}
 .p-todo{background:#EDECEA;color:#4A4845}
-.p-wip{background:#FFF0DC;color:#7A4500}
-.p-review{background:#FFF3CD;color:#6B4A00}
+.p-wip{background:#D6F5E8;color:#0A5C3E}
+.p-review{background:#FFF0DC;color:#7A4500}
 .p-done{background:#D6F5E8;color:#0A5C3E}
 .p-stuck{background:#FAD9D9;color:#7A1A1A}
 

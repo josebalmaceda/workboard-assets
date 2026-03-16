@@ -199,7 +199,7 @@ function buildHTML(){
       '</div>'+
       '<div id="wb-toolbar" style="display:none">'+
         '<button class="vbtn active" id="wb-vb">Table</button>'+
-        '<button class="vbtn" id="wb-vk">Kanban</button>'+
+        '<button class="vbtn" id="wb-vk">Visual Board</button>'+
         '<div style="width:1px;height:20px;background:#eee;margin:0 4px"></div>'+
         '<button class="btn fchip" id="wb-flt">Filter</button>'+
         '<button class="btn btnd" id="wb-flc" style="display:none;font-size:12px">Clear</button>'+

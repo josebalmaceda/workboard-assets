@@ -180,12 +180,12 @@ function buildHTML(){
         '<div id="wb-mtl"></div>'+
       '</div>'+
       '<div style="font-size:11px;color:#aaa;padding:10px 10px 4px;text-transform:uppercase">Navigation</div>'+
-      '<div class="sb-item" id="sbn-boards" onclick="setTab(\'boards\')"><span style="font-size:15px">📋</span> Boards</div>'+
+      '<div class="sb-item" id="sbn-boards" onclick="setTab(\'boards\')"><span style="font-size:15px">📋</span> Tasks</div>'+
       '<div class="sb-item" id="sbn-brand" onclick="setTab(\'brand\')"><span style="font-size:15px">🎨</span> Brand Kit</div>'+
       '<div class="sb-item" id="sbn-trash" onclick="setTab(\'trash\')"><span style="font-size:15px">🗑️</span> Trash</div>'+
-      '<div style="font-size:11px;color:#aaa;padding:10px 10px 4px;text-transform:uppercase;margin-top:4px">Boards</div>'+
+      '<div style="font-size:11px;color:#aaa;padding:10px 10px 4px;text-transform:uppercase;margin-top:4px">Task Boards</div>'+
       '<div id="wb-bl"></div>'+
-      '<div class="sb-item" id="wb-nbb" style="color:#aaa"><span style="font-size:16px">+</span> New board</div>'+
+      '<div class="sb-item" id="wb-nbb" style="color:#aaa"><span style="font-size:16px">+</span> New task board</div>'+
       '<div style="border-top:1px solid #eee;padding:10px 14px;font-size:11px;color:#aaa;margin-top:auto" id="wb-ttl">0 total tasks</div>'+
     '</div>'+
     '<div id="wb-main">'+
@@ -467,6 +467,7 @@ window.setTab=function(tab){
   if(tab==='brand') g('wb-bt').textContent='Brand Kit';
   else if(tab==='trash') g('wb-bt').textContent='Trash';
   else if(getB()) g('wb-bt').textContent=getB().name;
+  else g('wb-bt').textContent='Tasks';
   rC();
 };
 
@@ -512,7 +513,7 @@ function rC(){
   if(g('wb-bt')) g('wb-bt').textContent=b?b.name:'Board';
   if(g('wb-bcd')) g('wb-bcd').style.background=b?b.color:'transparent';
   if(!b){
-    c.innerHTML='<div class="wb-empty"><div style="font-size:40px">&#128203;</div><div style="font-size:16px;font-weight:500">No boards yet</div><button class="btn btnp" onclick="oAB()">+ Create board</button></div>';
+    c.innerHTML='<div class="wb-empty"><div style="font-size:40px">📋</div><div style="font-size:16px;font-weight:500">No task boards yet</div><button class="btn btnp" onclick="oAB()">+ Create task board</button></div>';
     return;
   }
   if(view==='kanban'){ rKan(b,c); return; }
@@ -971,14 +972,14 @@ function pshN(task,doneById){
 // ── BOARD MODAL ───────────────────────────────────────────────
 window.oAB=function oAB(){
   bmM='add'; sBC=CL[0];
-  g('wb-bmt').textContent='New board'; g('wb-bn').value='';
+  g('wb-bmt').textContent='New task board'; g('wb-bn').value='';
   g('wb-bdb').style.display='none';
   rCP('wb-bcp','sBC',sBC); openM('wb-bm');
 };
 function oEB(){
   var b=getB(); if(!b) return;
   bmM='edit'; sBC=b.color;
-  g('wb-bmt').textContent='Edit board'; g('wb-bn').value=b.name;
+  g('wb-bmt').textContent='Edit task board'; g('wb-bn').value=b.name;
   g('wb-bdb').style.display='inline-flex';
   rCP('wb-bcp','sBC',sBC); openM('wb-bm');
 }

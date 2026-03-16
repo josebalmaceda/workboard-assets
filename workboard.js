@@ -228,9 +228,37 @@ window.wbLG=function(id){
   var ref=db.ref('workboard/boards');
   ref.on('value',function(snap){
     var v=snap.val();
-    if(!v){ boards=[]; }
-    else if(Array.isArray(v)){ boards=v; }
-    else { boards=Object.keys(v).map(function(k){ return v[k]; }); }
+    var raw=[];
+    if(!v){ raw=[]; }
+    else if(Array.isArray(v)){ raw=v; }
+    else { raw=Object.keys(v).map(function(k){ return v[k]; }); }
+    // Sanitize: ensure every board has a groups array, every group has items array
+    boards=[];
+    for(var i=0;i<raw.length;i++){
+      if(!raw[i]) continue;
+      var b=raw[i];
+      var cleanGroups=[];
+      var grps=b.groups||[];
+      if(!Array.isArray(grps)){
+        var gkeys=Object.keys(grps);
+        var tmp=[];
+        for(var x=0;x<gkeys.length;x++) tmp.push(grps[gkeys[x]]);
+        grps=tmp;
+      }
+      for(var j=0;j<grps.length;j++){
+        if(!grps[j]) continue;
+        var gr=grps[j];
+        var items=gr.items||[];
+        if(!Array.isArray(items)){
+          var ikeys=Object.keys(items);
+          var tmp2=[];
+          for(var y=0;y<ikeys.length;y++) tmp2.push(items[ikeys[y]]);
+          items=tmp2;
+        }
+        cleanGroups.push({id:gr.id||uid(),name:gr.name||'Group',color:gr.color||'#7F77DD',items:items});
+      }
+      boards.push({id:b.id||uid(),name:b.name||'Board',color:b.color||'#7F77DD',groups:cleanGroups});
+    }
     if(!abid && boards.length) abid=boards[0].id;
     rAll();
   });

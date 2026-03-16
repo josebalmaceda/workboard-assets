@@ -558,7 +558,7 @@ function rBrand(c){
         (bk.logoData||bk.logo ? '<img src="'+(bk.logoData||bk.logo)+'" style="max-height:60px;max-width:200px;object-fit:contain" onerror="this.style.display=\'none\'"/>' : '<span style="font-size:12px;color:#aaa">No logo uploaded</span>')+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:8px">'+
-        '<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #F7931E;background:#FEF3E8;color:#EF5601;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">'+
+        '<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #E2E5E8;background:#F2F3F5;color:#38444E;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">'+
           '&#11015; Upload Logo'+
           '<input type="file" accept="image/*" style="display:none" onchange="wbUploadLogo(this,\''+activeBrand+'\')"/>'+
         '</label>'+
@@ -624,7 +624,7 @@ function rBrand(c){
   }
   if(!storedAssets.length) assetSec+='<div style="font-size:13px;color:#aaa;padding:8px 0">No assets uploaded yet</div>';
   assetSec+='</div>'+
-    '<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #F7931E;background:#FEF3E8;color:#EF5601;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">'+
+    '<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #E2E5E8;background:#F2F3F5;color:#38444E;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">'+
       '+ Upload Asset'+
       '<input type="file" accept="image/*,application/pdf,.svg,.eps,.ai,.zip" multiple style="display:none" onchange="wbUploadAsset(this,\''+activeBrand+'\')"/>'+
     '</label>'+

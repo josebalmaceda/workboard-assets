@@ -833,7 +833,7 @@ function uFil(){
     todo:  {bg:'#EDECEA',c:'#4A4845'},
     wip:   {bg:'#D6F5E8',c:'#0A5C3E'},
     review:{bg:'#FFF0DC',c:'#7A4500'},
-    done:  {bg:'#D6F5E8',c:'#0A5C3E'},
+    done:  {bg:'#D6F5E8',c:'#1D7A4E'},
     stuck: {bg:'#FAD9D9',c:'#7A1A1A'}
   };
   for(var i=0;i<ST.length;i++){

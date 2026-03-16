@@ -5,7 +5,8 @@ var db=firebase.database(app);
 var CL=["#7F77DD","#378ADD","#1D9E75","#EF9F27","#D4537E","#E24B4A","#639922","#BA7517"];
 var TM=[
   {id:"u1",name:"Thomas",color:"#7F77DD",tc:"#3C3489",i:"TH"},
-  {id:"u2",name:"Till Michael",color:"#EF9F27",tc:"#633806",i:"TM"},
+  {id:"u2",name:"Till",color:"#EF9F27",tc:"#633806",i:"TL"},
+  {id:"u9",name:"Michael",color:"#9B59B6",tc:"#5B2C6F",i:"MC"},
   {id:"u3",name:"Liz",color:"#1D9E75",tc:"#085041",i:"LZ"},
   {id:"u4",name:"Johanna",color:"#D4537E",tc:"#712B13",i:"JO"},
   {id:"u5",name:"Marial",color:"#378ADD",tc:"#0C447C",i:"MA"},

@@ -86,6 +86,19 @@ var tmM,tmG,tmI,bmM,gmM,gmG;
 var sO,sBC=CL[0],sGC=CL[2];
 var loginUser=null;
 
+// Persist seen notifications across refreshes per user
+function loadSeenNotifs(userId){
+  try{ var s=sessionStorage.getItem('wb_seen_'+userId); if(s){ var arr=JSON.parse(s); for(var i=0;i<arr.length;i++) seen.add(arr[i]); } }catch(e){}
+}
+function saveSeenNotif(userId,key){
+  seen.add(key);
+  try{ var arr=Array.from(seen); sessionStorage.setItem('wb_seen_'+userId,JSON.stringify(arr)); }catch(e){}
+}
+// Session persistence
+function saveSession(userId){ try{ sessionStorage.setItem('wb_session',userId); }catch(e){} }
+function loadSession(){ try{ return sessionStorage.getItem('wb_session'); }catch(e){ return null; } }
+function clearSession(){ try{ sessionStorage.removeItem('wb_session'); }catch(e){} }
+
 function uid(){ return Math.random().toString(36).slice(2,10); }
 function g(id){ return document.getElementById(id); }
 function getB(){ return boards.filter(function(b){ return b.id===abid; })[0]||boards[0]||null; }
@@ -331,6 +344,8 @@ function doLogin(id){
   for(var i=0;i<TM.length;i++) if(TM[i].id===id){ cu=TM[i]; break; }
   if(!cu) return;
   sO=cu.id;
+  saveSession(cu.id);
+  loadSeenNotifs(cu.id);
   g('wb-login').style.display='none';
   g('wb-app').style.display='flex';
 
@@ -388,7 +403,8 @@ function doLogin(id){
 
 window.wbLO=function(){
   if(uB) uB(); if(uN) uN(); if(uT) uT();
-  cu=null; boards=[]; trash=[];
+  cu=null; boards=[]; trash=[]; seen=new Set(); nh=[];
+  clearSession();
   g('wb-app').style.display='none';
   g('wb-login').style.display='flex';
 };
@@ -1066,9 +1082,21 @@ window.wbSubmitCPW=function(){
 };
 
 // ── START ─────────────────────────────────────────────────────
+function start(){
+  buildHTML();
+  g('wb-loading').style.display='none';
+  var savedSession=loadSession();
+  if(savedSession){
+    // Auto-login — skip password on refresh
+    doLogin(savedSession);
+  } else {
+    g('wb-login').style.display='flex';
+    rLogin();
+  }
+}
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',function(){ buildHTML(); g('wb-loading').style.display='none'; g('wb-login').style.display='flex'; rLogin(); });
+  document.addEventListener('DOMContentLoaded',start);
 } else {
-  buildHTML(); g('wb-loading').style.display='none'; g('wb-login').style.display='flex'; rLogin();
+  start();
 }
 })();

@@ -511,7 +511,7 @@ function rAL(){
 }
 window.wbSO=function(id){ sO=id; rAL(); };
 
-function oAT(gid){
+window.oAT=function oAT(gid){
   tmM='add'; tmG=gid; tmI=null; sO=TM[0].id;
   g('wb-tmt').textContent='New task';
   g('wb-tn').value=''; g('wb-td').value=''; g('wb-tnotes').value='';
@@ -614,7 +614,7 @@ function pshN(task,doneBy){
   db.ref('workboard/notifs/'+t).push({id:uid(),taskName:task.name,assigneeId:doneBy,taskId:task.id,ts:Date.now()});
 }
 
-function oAB(){
+window.oAB=function oAB(){
   bmM='add'; sBC=CL[0];
   g('wb-bmt').textContent='New board';
   g('wb-bn').value='';
@@ -652,7 +652,7 @@ function dlB(){
   fbSave(); closeM('wb-bm'); rAll();
 }
 
-function oAG(){
+window.oAG=function oAG(){
   gmM='add'; gmG=null; sGC=CL[2];
   g('wb-gmt').textContent='New group';
   g('wb-gn').value='';

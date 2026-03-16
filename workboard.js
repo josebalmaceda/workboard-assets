@@ -150,9 +150,14 @@ function buildHTML(){
   '<div id="wb-loading"><div class="wb-sp"></div><span style="font-size:13px;color:#aaa">Loading WorkBoard...</span></div>'+
   // LOGIN
   '<div id="wb-login" style="display:none">'+
-    '<div style="background:#fff;border-radius:16px;border:1px solid #e0e0e0;padding:36px 40px;width:420px;max-width:92vw">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="width:10px;height:10px;border-radius:50%;background:#7F77DD"></div><span style="font-size:20px;font-weight:500">WorkBoard</span></div>'+
-      '<p style="font-size:13px;color:#888;margin-bottom:20px">Choose your account</p>'+
+    '<div class="wb-login-card">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+
+        '<div style="width:30px;height:30px;border-radius:8px;background:#38444E;display:flex;align-items:center;justify-content:center">'+
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'+
+        '</div>'+
+        '<span style="font-size:18px;font-weight:700;color:#38444E">WorkBoard</span>'+
+      '</div>'+
+      '<p style="font-size:13px;color:#6B7A84;margin-bottom:20px">Sign in to your account</p>'+
       '<div id="wb-llist"></div>'+
     '</div>'+
   '</div>'+
@@ -173,7 +178,11 @@ function buildHTML(){
   // APP
   '<div id="wb-app" style="display:none">'+
     '<div id="wb-sb">'+
-      '<div style="padding:14px;font-size:16px;font-weight:500;display:flex;align-items:center;gap:8px;border-bottom:1px solid #eee"><div style="width:10px;height:10px;border-radius:50%;background:#7F77DD"></div>WorkBoard</div>'+
+    '<div style="padding:0 16px;height:56px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;border-bottom:1px solid #E2E5E8;color:#38444E">'+
+        '<div style="width:28px;height:28px;border-radius:8px;background:#38444E;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'+
+        '</div>WorkBoard'+
+      '</div>'+
       '<div id="wb-sbu" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:#f5f5f5;margin:10px 10px 6px"></div>'+
       '<div id="wb-mts" style="display:none;padding:10px 12px;border-bottom:1px solid #eee">'+
         '<div style="font-size:11px;color:#aaa;padding:0 0 6px;text-transform:uppercase">My tasks (<span id="wb-mtc">0</span>)</div>'+
@@ -289,7 +298,7 @@ function rLogin(){
   var h='';
   for(var i=0;i<TM.length;i++){
     var u=TM[i];
-    h+='<div style="display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;border:1px solid #e8e8e8;cursor:pointer;margin-bottom:8px;transition:background .1s" onmouseover="this.style.background=\'#f8f7ff\'" onmouseout="this.style.background=\'#fff\'" onclick="wbSelectUser(\''+u.id+'\')">'+av(u.id,36)+'<span style="font-size:14px;font-weight:500">'+u.name+'</span></div>';
+    h+='<div class="wb-login-item" onclick="wbSelectUser(\''+u.id+'\')">'+av(u.id,36)+'<span style="font-size:14px;font-weight:500">'+u.name+'</span></div>';
   }
   g('wb-llist').innerHTML=h;
 }

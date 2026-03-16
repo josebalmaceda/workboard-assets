@@ -238,13 +238,40 @@ function svT(){
     boards=boards.map(function(b){return b.id===getB().id?Object.assign({},b,{groups:b.groups.map(function(gr){return gr.id===tmG?Object.assign({},gr,{items:[item].concat(gr.items)}):gr;})}):b;});
   }else{
     var prev=tmI,upd=Object.assign({},prev,{name:name,status:st,priority:pr,ownerId:sO,due:due,notes:notes});
-    boards=boards.map(function(b){return Object.assign({},b,{groups:b.groups.map(function(gr){return Object.assign({},gr,{items:gr.items.map(function(i){return i.id===prev.id?upd:i;});});});});});
+    boards=boards.map(function(b){
+      return Object.assign({},b,{groups:b.groups.map(function(gr){
+        return Object.assign({},gr,{items:gr.items.map(function(i){
+          return i.id===prev.id?upd:i;
+        })});
+      })});
+    });
     if(prev.status!=='done'&&st==='done')pshN(upd,cu.id);
   }
   fbSave();closeM('wb-tm');rAll();
 }
-function dlT(){if(!tmI)return;boards=boards.map(function(b){return Object.assign({},b,{groups:b.groups.map(function(gr){return Object.assign({},gr,{items:gr.items.filter(function(i){return i.id!==tmI.id;});});});});});fbSave();closeM('wb-tm');rAll();}
-window.wbQD=function(itemId){var i=find(itemId);if(!i||i.ownerId!==cu.id)return;var u=Object.assign({},i,{status:'done'});boards=boards.map(function(b){return Object.assign({},b,{groups:b.groups.map(function(gr){return Object.assign({},gr,{items:gr.items.map(function(x){return x.id===itemId?u:x;});});});});});pshN(u,cu.id);fbSave();rAll();};
+function dlT(){
+  if(!tmI)return;
+  boards=boards.map(function(b){
+    return Object.assign({},b,{groups:b.groups.map(function(gr){
+      return Object.assign({},gr,{items:gr.items.filter(function(i){
+        return i.id!==tmI.id;
+      })});
+    })});
+  });
+  fbSave();closeM('wb-tm');rAll();
+}
+window.wbQD=function(itemId){
+  var i=find(itemId);if(!i||i.ownerId!==cu.id)return;
+  var u=Object.assign({},i,{status:'done'});
+  boards=boards.map(function(b){
+    return Object.assign({},b,{groups:b.groups.map(function(gr){
+      return Object.assign({},gr,{items:gr.items.map(function(x){
+        return x.id===itemId?u:x;
+      })});
+    })});
+  });
+  pshN(u,cu.id);fbSave();rAll();
+};
 function pshN(task,doneBy){var t=task.assignedBy;if(!t||t===doneBy)return;db.ref('workboard/notifs/'+t).push({id:uid(),taskName:task.name,assigneeId:doneBy,taskId:task.id,ts:Date.now()});}
 
 function oAB(){bmM='add';sBC=CL[0];g('wb-bmt').textContent='New board';g('wb-bn').value='';g('wb-bdb').style.display='none';rCP('wb-bcp','sBC',sBC);openM('wb-bm');}

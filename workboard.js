@@ -579,9 +579,11 @@ function rBrand(c){
     fontSec+='<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border:1px solid #eee;border-radius:10px;flex-wrap:wrap;gap:12px">'+
       '<div>'+
         '<div style="font-size:22px;font-weight:700;margin-bottom:4px">'+f.name+'</div>'+
-        '<div style="font-size:12px;color:#888">'+f.role+' &nbsp;·&nbsp; '+f.weights+'</div>'+
+        '<div style="font-size:12px;color:#555;margin-bottom:2px"><strong>Role:</strong> '+f.role+'</div>'+
+        '<div style="font-size:12px;color:#888"><strong>Weights:</strong> '+f.weights+'</div>'+
+        (f.designers?'<div style="font-size:12px;color:#aaa;margin-top:2px"><strong>By:</strong> '+f.designers+'</div>':'')+
       '</div>'+
-      '<a href="'+f.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;font-size:12px;text-decoration:none;font-family:inherit">&#128279; View on Google Fonts</a>'+
+      '<a href="'+f.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;font-size:12px;text-decoration:none;font-family:inherit;white-space:nowrap">&#128279; View Font</a>'+
     '</div>';
   }
   fontSec+='</div></div>';

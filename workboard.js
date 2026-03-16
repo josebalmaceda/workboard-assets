@@ -88,16 +88,23 @@ var loginUser=null;
 
 // Persist seen notifications across refreshes per user
 function loadSeenNotifs(userId){
-  try{ var s=sessionStorage.getItem('wb_seen_'+userId); if(s){ var arr=JSON.parse(s); for(var i=0;i<arr.length;i++) seen.add(arr[i]); } }catch(e){}
+  try{
+    var s=localStorage.getItem('wb_seen_'+userId);
+    if(s){ var arr=JSON.parse(s); for(var i=0;i<arr.length;i++) seen.add(arr[i]); }
+  }catch(e){}
 }
 function saveSeenNotif(userId,key){
   seen.add(key);
-  try{ var arr=Array.from(seen); sessionStorage.setItem('wb_seen_'+userId,JSON.stringify(arr)); }catch(e){}
+  try{ var arr=Array.from(seen); localStorage.setItem('wb_seen_'+userId,JSON.stringify(arr)); }catch(e){}
+}
+function saveClearedNotifs(userId){
+  // Save current seen set (which now includes all nh keys) so they never reappear
+  try{ var arr=Array.from(seen); localStorage.setItem('wb_seen_'+userId,JSON.stringify(arr)); }catch(e){}
 }
 // Session persistence
-function saveSession(userId){ try{ sessionStorage.setItem('wb_session',userId); }catch(e){} }
-function loadSession(){ try{ return sessionStorage.getItem('wb_session'); }catch(e){ return null; } }
-function clearSession(){ try{ sessionStorage.removeItem('wb_session'); }catch(e){} }
+function saveSession(userId){ try{ localStorage.setItem('wb_session',userId); }catch(e){} }
+function loadSession(){ try{ return localStorage.getItem('wb_session'); }catch(e){ return null; } }
+function clearSession(){ try{ localStorage.removeItem('wb_session'); }catch(e){} }
 
 function uid(){ return Math.random().toString(36).slice(2,10); }
 function g(id){ return document.getElementById(id); }
@@ -407,6 +414,7 @@ window.wbLO=function(){
   clearSession();
   g('wb-app').style.display='none';
   g('wb-login').style.display='flex';
+  rLogin();
 };
 
 // ── WIRE BUTTONS ──────────────────────────────────────────────
@@ -421,7 +429,14 @@ function wire(){
   g('wb-flc').onclick=clrF;
   g('wb-si').oninput=function(){ fil.s=this.value; uFil(); rC(); };
   g('wb-bellt').onclick=tNP;
-  g('wb-npc').onclick=function(){ nh=[]; updBell(); rNP(); g('wb-np').classList.remove('open'); };
+  g('wb-npc').onclick=function(){
+    // Mark all current notif keys as permanently seen in localStorage
+    for(var i=0;i<nh.length;i++) seen.add(nh[i].key);
+    saveClearedNotifs(cu.id);
+    nh=[];
+    updBell(); rNP();
+    g('wb-np').classList.remove('open');
+  };
   g('wb-tsb2').onclick=svT;
   g('wb-tcb').onclick=function(){ closeM('wb-tm'); };
   g('wb-tmc').onclick=function(){ closeM('wb-tm'); };
@@ -921,9 +936,21 @@ window.wbQD=function(itemId){
   fbSave(); rAll();
 };
 
-function pshN(task,doneBy){
-  var t=task.assignedBy; if(!t||t===doneBy) return;
-  db.ref('workboard/notifs/'+t).push({id:uid(),taskName:task.name,assigneeId:doneBy,taskId:task.id,ts:Date.now()});
+function pshN(task,doneById){
+  // Notify creator (assignedBy) that assignee completed the task
+  if(task.assignedBy && task.assignedBy!==doneById){
+    db.ref('workboard/notifs/'+task.assignedBy).push({
+      id:uid(),taskName:task.name,assigneeId:doneById,
+      toUserId:task.assignedBy,taskId:task.id,ts:Date.now()
+    });
+  }
+  // Notify assignee (ownerId) if someone else marked it done (e.g. creator quick-completed)
+  if(task.ownerId && task.ownerId!==doneById){
+    db.ref('workboard/notifs/'+task.ownerId).push({
+      id:uid(),taskName:task.name,assigneeId:doneById,
+      toUserId:task.ownerId,taskId:task.id,ts:Date.now()
+    });
+  }
 }
 
 // ── BOARD MODAL ───────────────────────────────────────────────

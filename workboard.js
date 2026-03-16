@@ -152,7 +152,7 @@ function buildHTML(){
   '<div id="wb-login" style="display:none">'+
     '<div class="wb-login-card">'+
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+
-        '<div style="width:30px;height:30px;border-radius:8px;background:#38444E;display:flex;align-items:center;justify-content:center">'+
+        '<div style="width:30px;height:30px;border-radius:8px;background:#F7931E;display:flex;align-items:center;justify-content:center">'+
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'+
         '</div>'+
         '<span style="font-size:18px;font-weight:700;color:#38444E">WorkBoard</span>'+
@@ -171,7 +171,7 @@ function buildHTML(){
       '<div id="wb-pw-err" style="color:#E24B4A;font-size:12px;min-height:18px;margin-bottom:10px"></div>'+
       '<div style="display:flex;gap:8px">'+
         '<button onclick="wbPWCancel()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:13px;cursor:pointer;font-family:inherit">Back</button>'+
-        '<button onclick="wbPWSubmit()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#7F77DD;color:#fff;font-size:13px;cursor:pointer;font-weight:500;font-family:inherit">Sign in</button>'+
+        '<button onclick="wbPWSubmit()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#F7931E;color:#fff;font-size:13px;cursor:pointer;font-weight:500;font-family:inherit">Sign in</button>'+
       '</div>'+
     '</div>'+
   '</div>'+
@@ -179,7 +179,7 @@ function buildHTML(){
   '<div id="wb-app" style="display:none">'+
     '<div id="wb-sb">'+
     '<div style="padding:0 16px;height:56px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;border-bottom:1px solid #E2E5E8;color:#38444E">'+
-        '<div style="width:28px;height:28px;border-radius:8px;background:#38444E;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
+        '<div style="width:28px;height:28px;border-radius:8px;background:#F7931E;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'+
         '</div>WorkBoard'+
       '</div>'+
@@ -253,7 +253,7 @@ function buildHTML(){
       '<div id="wb-cpw-ok" style="color:#1D9E75;font-size:12px;min-height:18px;margin-bottom:12px"></div>'+
       '<div style="display:flex;gap:8px">'+
         '<button onclick="wbCloseCPW()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>'+
-        '<button onclick="wbSubmitCPW()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#7F77DD;color:#fff;font-size:13px;cursor:pointer;font-weight:500;font-family:inherit">Save password</button>'+
+        '<button onclick="wbSubmitCPW()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#F7931E;color:#fff;font-size:13px;cursor:pointer;font-weight:500;font-family:inherit">Save password</button>'+
       '</div>'+
     '</div>'+
   '</div>'+

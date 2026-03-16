@@ -117,8 +117,8 @@ input,select,textarea{font-family:inherit}
   white-space:nowrap;flex-shrink:0;transition:background .1s,border-color .1s;
 }
 .btn:hover{background:var(--surface);border-color:#c5ccd2}
-.btnp{background:var(--navy);border-color:var(--navy);color:#fff}
-.btnp:hover{background:var(--navy-dark);border-color:var(--navy-dark)}
+.btnp{background:#F7931E;border-color:#F7931E;color:#fff}
+.btnp:hover{background:#e07f0c;border-color:#e07f0c}
 .btnd{color:var(--red);border-color:#f0c0bb;background:#fff}
 .btnd:hover{background:var(--red-lt)}
 .vbtn{

@@ -32,48 +32,35 @@ var PR=[
   {v:"low",l:"Low",c:"#639922"}
 ];
 
-// Brand kit data
 var BRANDS={
   combase:{
     name:"COMBASE",
     logo:"https://beta.combase.de/wp-content/uploads/2026/01/COMBASE-Logo.png",
     colors:[
-      {name:"Primary Blue",hex:"#003B6F"},
-      {name:"Accent Blue",hex:"#0072CE"},
-      {name:"Light Blue",hex:"#E5F2FF"},
-      {name:"Dark Grey",hex:"#222222"},
-      {name:"Mid Grey",hex:"#666666"},
-      {name:"Light Grey",hex:"#F5F5F5"},
-      {name:"White",hex:"#FFFFFF"},
-      {name:"Success Green",hex:"#1D9E75"}
+      {name:"Dark Navy Blue",hex:"#38444E",cmyk:"C28, M13, Y0, K69",rgb:"R56, G68, B78"}
     ],
     fonts:[
       {name:"Inter",role:"Primary / UI",weights:"Regular 400, Medium 500, SemiBold 600, Bold 700",url:"https://fonts.google.com/specimen/Inter"},
       {name:"Plus Jakarta Sans",role:"Headings",weights:"SemiBold 600, Bold 700, ExtraBold 800",url:"https://fonts.google.com/specimen/Plus+Jakarta+Sans"}
     ],
     assets:[
-      {name:"COMBASE Logo PNG",url:"https://beta.combase.de/wp-content/uploads/2026/01/COMBASE-Logo.png"},
+      {name:"COMBASE Logo PNG",url:"https://beta.combase.de/wp-content/uploads/2026/01/COMBASE-Logo.png"}
     ]
   },
   korona:{
     name:"KORONA POS",
     logo:"https://www.koronapos.com/wp-content/uploads/2021/03/korona-pos-logo.png",
     colors:[
-      {name:"KORONA Red",hex:"#E3001B"},
-      {name:"Dark",hex:"#1A1A1A"},
-      {name:"Mid Grey",hex:"#555555"},
-      {name:"Light Grey",hex:"#F2F2F2"},
-      {name:"White",hex:"#FFFFFF"},
-      {name:"Accent Orange",hex:"#F5A623"},
-      {name:"Success",hex:"#27AE60"},
-      {name:"Info Blue",hex:"#2980B9"}
+      {name:"Red Orange",hex:"#EF5601",cmyk:"C0, M64, Y100, K6",rgb:"R239, G86, B1"},
+      {name:"Orange",hex:"#F7931E",cmyk:"C0, M40, Y88, K3",rgb:"R247, G147, B30"},
+      {name:"Dark Navy Blue",hex:"#38444E",cmyk:"C28, M13, Y0, K69",rgb:"R56, G68, B78"}
     ],
     fonts:[
       {name:"Roboto",role:"Primary / UI",weights:"Regular 400, Medium 500, Bold 700",url:"https://fonts.google.com/specimen/Roboto"},
       {name:"Roboto Condensed",role:"Headings / Display",weights:"Bold 700, ExtraBold 800",url:"https://fonts.google.com/specimen/Roboto+Condensed"}
     ],
     assets:[
-      {name:"KORONA POS Logo PNG",url:"https://www.koronapos.com/wp-content/uploads/2021/03/korona-pos-logo.png"},
+      {name:"KORONA POS Logo PNG",url:"https://www.koronapos.com/wp-content/uploads/2021/03/korona-pos-logo.png"}
     ]
   }
 };
@@ -561,12 +548,17 @@ function rBrand(c){
     '<div style="display:flex;flex-wrap:wrap;gap:12px">';
   for(var i=0;i<bk.colors.length;i++){
     var clr=bk.colors[i];
-    var isDark=parseInt(clr.hex.replace('#',''),16)<0x888888*1.5;
-    colorSec+='<div style="width:100px">'+
-      '<div onclick="wbCopyColor(\''+clr.hex+'\')" title="Click to copy" style="width:100px;height:70px;border-radius:8px;background:'+clr.hex+';border:1px solid rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:flex-end;padding:6px;transition:transform .1s" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">'+
-        '<span style="font-size:10px;font-weight:600;color:'+(isDark?'rgba(255,255,255,.8)':'rgba(0,0,0,.5)')+'">'+clr.hex+'</span>'+
+    var lum=parseInt(clr.hex.replace('#',''),16);
+    var isDark=(((lum>>16)&0xff)*299+((lum>>8)&0xff)*587+(lum&0xff)*114)/1000 < 128;
+    colorSec+='<div style="width:160px">'+
+      '<div onclick="wbCopyColor(\''+clr.hex+'\')" title="Click to copy hex" style="width:160px;height:80px;border-radius:8px;background:'+clr.hex+';border:1px solid rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:flex-end;padding:8px;transition:transform .1s" onmouseover="this.style.transform=\'scale(1.03)\'" onmouseout="this.style.transform=\'scale(1)\'">'+
+        '<span style="font-size:11px;font-weight:600;color:'+(isDark?'rgba(255,255,255,.85)':'rgba(0,0,0,.55)')+'">'+clr.hex+'</span>'+
       '</div>'+
-      '<div style="font-size:12px;font-weight:500;margin-top:6px;color:#333">'+clr.name+'</div>'+
+      '<div style="margin-top:8px">'+
+        '<div style="font-size:13px;font-weight:600;color:#222">'+clr.name+'</div>'+
+        (clr.cmyk?'<div style="font-size:11px;color:#888;margin-top:2px">'+clr.cmyk+'</div>':'')+
+        (clr.rgb?'<div style="font-size:11px;color:#aaa">'+clr.rgb+'</div>':'')+
+      '</div>'+
     '</div>';
   }
   colorSec+='</div></div>';

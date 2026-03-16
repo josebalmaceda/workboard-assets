@@ -392,6 +392,7 @@ function doLogin(id){
     }
   });
   uN=function(){ nref.off('child_added'); };
+  loadBrandAssets();
   wire();
 }
 
@@ -535,10 +536,16 @@ function rBrand(c){
   var logoSec='<div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:24px;margin-bottom:20px">'+
     '<div style="font-size:13px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px">Logo</div>'+
     '<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">'+
-      '<div style="background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:24px 32px;display:flex;align-items:center;justify-content:center">'+
-        '<img src="'+bk.logo+'" style="max-height:60px;max-width:200px;object-fit:contain" onerror="this.style.display=\'none\'"/>'+
+      '<div id="wb-logo-preview-'+activeBrand+'" style="background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:24px 32px;display:flex;align-items:center;justify-content:center;min-width:200px;min-height:80px">'+
+        (bk.logoData||bk.logo ? '<img src="'+(bk.logoData||bk.logo)+'" style="max-height:60px;max-width:200px;object-fit:contain" onerror="this.style.display=\'none\'"/>' : '<span style="font-size:12px;color:#aaa">No logo uploaded</span>')+
       '</div>'+
-      '<a href="'+bk.logo+'" download target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;font-size:13px;text-decoration:none;font-family:inherit">&#11015; Download Logo</a>'+
+      '<div style="display:flex;flex-direction:column;gap:8px">'+
+        '<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #7F77DD;background:#f0effe;color:#7F77DD;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">'+
+          '&#11015; Upload Logo'+
+          '<input type="file" accept="image/*" style="display:none" onchange="wbUploadLogo(this,\''+activeBrand+'\')"/>'+
+        '</label>'+
+        (bk.logo||bk.logoData ? '<a href="'+(bk.logoData||bk.logo)+'" download target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;font-size:13px;text-decoration:none;font-family:inherit">&#11015; Download Logo</a>' : '')+
+      '</div>'+
     '</div>'+
   '</div>';
 
@@ -581,13 +588,27 @@ function rBrand(c){
 
   // Assets
   var assetSec='<div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:24px;margin-bottom:20px">'+
-    '<div style="font-size:13px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px">Downloads</div>'+
-    '<div style="display:flex;flex-wrap:wrap;gap:10px">';
-  for(var i=0;i<bk.assets.length;i++){
-    var a=bk.assets[i];
-    assetSec+='<a href="'+a.url+'" download target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;font-size:13px;text-decoration:none;font-family:inherit;transition:background .1s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">&#11015; '+a.name+'</a>';
+    '<div style="font-size:13px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px">Assets</div>'+
+    '<div id="wb-assets-list-'+activeBrand+'" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px">';
+  var storedAssets=bk.uploadedAssets||[];
+  for(var i=0;i<storedAssets.length;i++){
+    var a=storedAssets[i];
+    assetSec+='<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border:1px solid #eee;border-radius:10px;background:#fafafa;width:120px">'+
+      '<img src="'+a.data+'" style="max-width:90px;max-height:60px;object-fit:contain;border-radius:4px"/>'+
+      '<span style="font-size:11px;color:#666;text-align:center;word-break:break-word;max-width:100px">'+a.name+'</span>'+
+      '<div style="display:flex;gap:4px">'+
+        '<a href="'+a.data+'" download="'+a.name+'" style="font-size:11px;color:#7F77DD;text-decoration:none;padding:2px 6px;border:1px solid #c5c0f5;border-radius:4px">&#11015;</a>'+
+        '<button onclick="wbDeleteAsset(\''+activeBrand+'\','+i+')" style="font-size:11px;color:#A32D2D;background:none;border:1px solid #F09595;border-radius:4px;padding:2px 6px;cursor:pointer;font-family:inherit">&#215;</button>'+
+      '</div>'+
+    '</div>';
   }
-  assetSec+='</div></div>';
+  if(!storedAssets.length) assetSec+='<div style="font-size:13px;color:#aaa;padding:8px 0">No assets uploaded yet</div>';
+  assetSec+='</div>'+
+    '<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #7F77DD;background:#f0effe;color:#7F77DD;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">'+
+      '+ Upload Asset'+
+      '<input type="file" accept="image/*,application/pdf,.svg,.eps,.ai,.zip" multiple style="display:none" onchange="wbUploadAsset(this,\''+activeBrand+'\')"/>'+
+    '</label>'+
+  '</div>';
 
   c.innerHTML='<div style="padding:4px 0">'+tabs+logoSec+colorSec+fontSec+assetSec+'</div>';
 
@@ -1059,6 +1080,87 @@ function rNP(){
     '</div>';
   }
   l.innerHTML=h;
+}
+
+// ── BRAND UPLOADS ─────────────────────────────────────────────
+window.wbUploadLogo=function(input,brandKey){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var data=e.target.result;
+    // Save to Firebase
+    db.ref('workboard/brandAssets/'+brandKey+'/logo').set(data,function(){
+      BRANDS[brandKey].logoData=data;
+      // Update preview without full re-render
+      var prev=g('wb-logo-preview-'+brandKey);
+      if(prev) prev.innerHTML='<img src="'+data+'" style="max-height:60px;max-width:200px;object-fit:contain"/>';
+      // Show toast
+      wbBrandToast('Logo uploaded!');
+      // Re-render to update download button
+      rC();
+    });
+  };
+  reader.readAsDataURL(file);
+};
+
+window.wbUploadAsset=function(input,brandKey){
+  var files=input.files; if(!files||!files.length) return;
+  var bk=BRANDS[brandKey];
+  if(!bk.uploadedAssets) bk.uploadedAssets=[];
+  var toRead=files.length,done=0;
+  for(var i=0;i<files.length;i++){
+    (function(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        bk.uploadedAssets.push({name:file.name,data:e.target.result});
+        done++;
+        if(done===toRead){
+          // Save to Firebase
+          db.ref('workboard/brandAssets/'+brandKey+'/assets').set(bk.uploadedAssets,function(){
+            wbBrandToast(toRead+' asset'+(toRead>1?'s':'')+' uploaded!');
+            rC();
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+};
+
+window.wbDeleteAsset=function(brandKey,index){
+  var bk=BRANDS[brandKey];
+  if(!bk.uploadedAssets) return;
+  bk.uploadedAssets.splice(index,1);
+  db.ref('workboard/brandAssets/'+brandKey+'/assets').set(bk.uploadedAssets,function(){
+    wbBrandToast('Asset deleted.');
+    rC();
+  });
+};
+
+function wbBrandToast(msg){
+  var t=g('wb-color-toast');
+  if(t){
+    t.textContent=msg;
+    t.style.transform='translateX(-50%) translateY(0)';
+    clearTimeout(window._colorToastTimer);
+    window._colorToastTimer=setTimeout(function(){ t.style.transform='translateX(-50%) translateY(80px)'; },2500);
+  }
+}
+
+// Load brand assets from Firebase
+function loadBrandAssets(){
+  db.ref('workboard/brandAssets').once('value',function(snap){
+    var v=snap.val(); if(!v) return;
+    var keys=Object.keys(BRANDS);
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i];
+      if(v[k]){
+        if(v[k].logo) BRANDS[k].logoData=v[k].logo;
+        if(v[k].assets) BRANDS[k].uploadedAssets=v[k].assets;
+      }
+    }
+    if(activeTab==='brand') rC();
+  });
 }
 
 // ── CHANGE PASSWORD ───────────────────────────────────────────

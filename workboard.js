@@ -784,7 +784,10 @@ function rKan(board,c){
         var it=board.groups[gi].items[ii];
         if(it.status===sc.v) tasks.push({item:it,gc:board.groups[gi].color});
       }
-    h+='<div class="kan-col"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:10px;height:10px;border-radius:50%;background:'+sc.d+'"></div><span style="font-size:13px;font-weight:500">'+sc.l+'</span><span style="font-size:12px;color:#aaa;margin-left:auto">'+tasks.length+'</span></div>';
+    h+='<div class="kan-col"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+
+      '<div style="width:10px;height:10px;border-radius:50%;background:'+sc.d+';flex-shrink:0"></div>'+
+      '<span style="font-size:13px;font-weight:600;color:#38444E">'+sc.l+'</span>'+
+      '<span style="font-size:12px;color:#9CA3AF;margin-left:auto;font-weight:500">'+tasks.length+'</span></div>';
     for(var ti=0;ti<tasks.length;ti++){
       var t=tasks[ti].item,gc=tasks[ti].gc;
       var im=t.ownerId===cu.id&&t.status!=='done';

@@ -71,6 +71,64 @@ var uB=null,uN=null,uT=null;
 var tmM,tmG,tmI,bmM,gmM,gmG;
 var sO,sBC=CL[0],sGC=CL[2];
 var loginUser=null;
+var briefFilesStaging=[];   // files staged for brief upload
+var commentFilesStaging=[];  // files staged for comment upload
+
+function isImageFile(name){ return /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i.test(name); }
+
+function fileIcon(name){
+  if(/\.pdf$/i.test(name)) return '&#128196;';
+  if(/\.(doc|docx)$/i.test(name)) return '&#128196;';
+  if(/\.(xls|xlsx)$/i.test(name)) return '&#128200;';
+  if(/\.(zip|rar|7z)$/i.test(name)) return '&#128230;';
+  if(/\.(mp4|mov|avi)$/i.test(name)) return '&#127916;';
+  return '&#128196;';
+}
+
+function renderFilePreview(files, containerId, removeFn){
+  var c=g(containerId); if(!c) return;
+  if(!files.length){ c.innerHTML=''; return; }
+  var h='';
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    if(isImageFile(f.name)){
+      h+='<div style="position:relative;display:inline-block">'+
+        '<img src="'+f.data+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #E2E5E8"/>'+
+        '<button onclick="'+removeFn+'('+i+')" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#B03020;color:#fff;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;font-family:inherit">&#215;</button>'+
+        '<div style="font-size:9px;color:#6B7A84;text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">'+f.name+'</div>'+
+      '</div>';
+    } else {
+      h+='<div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid #E2E5E8;border-radius:6px;background:#F7F8FA;font-size:12px;color:#3D4F5C;position:relative">'+
+        '<span>'+fileIcon(f.name)+'</span>'+
+        '<span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+f.name+'</span>'+
+        '<button onclick="'+removeFn+'('+i+')" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:14px;padding:0;line-height:1;font-family:inherit">&#215;</button>'+
+      '</div>';
+    }
+  }
+  c.innerHTML=h;
+}
+
+function renderSavedFiles(files){
+  if(!files||!files.length) return '';
+  var h='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">';
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    if(isImageFile(f.name)){
+      h+='<a href="'+f.data+'" download="'+f.name+'" target="_blank" style="display:inline-block;text-decoration:none">'+
+        '<img src="'+f.data+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #E2E5E8" title="'+f.name+'"/>'+
+        '<div style="font-size:9px;color:#6B7A84;text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">'+f.name+'</div>'+
+      '</a>';
+    } else {
+      h+='<a href="'+f.data+'" download="'+f.name+'" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #E2E5E8;border-radius:6px;background:#F7F8FA;font-size:12px;color:#3D4F5C;text-decoration:none">'+
+        '<span>'+fileIcon(f.name)+'</span>'+
+        '<span style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+f.name+'</span>'+
+        '<span style="font-size:10px;color:#9CA3AF">&#11015;</span>'+
+      '</a>';
+    }
+  }
+  h+='</div>';
+  return h;
+}
 
 function loadSeenNotifs(userId){
   try{ var s=localStorage.getItem('wb_seen_'+userId); if(s){ var arr=JSON.parse(s); for(var i=0;i<arr.length;i++) seen.add(arr[i]); } }catch(e){}
@@ -260,7 +318,28 @@ function buildHTML(){
       '<div class="wb-field"><label>Priority</label><select id="wb-tp"></select></div>'+
       '<div class="wb-field"><label>Due date</label><input type="date" id="wb-td"/></div>'+
     '</div>'+
-    '<div class="wb-field"><label>Notes</label><textarea id="wb-tnotes" placeholder="Add notes..."></textarea></div>',
+    '<div class="wb-field"><label>Notes / Brief</label><textarea id="wb-tnotes" placeholder="Add notes or brief..."></textarea></div>'+
+    '<div class="wb-field" id="wb-brief-files-field">'+
+      '<label>Brief / Request Files <span style="font-size:11px;color:#9CA3AF;font-weight:400">(creator only)</span></label>'+
+      '<div id="wb-brief-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>'+
+      '<label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #E2E5E8;background:#F2F3F5;color:#38444E;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">'+
+        '+ Attach file<input type="file" id="wb-brief-file-input" multiple style="display:none" onchange="wbAddBriefFiles(this)"/>'+
+      '</label>'+
+    '</div>'+
+    '<div class="wb-field" id="wb-comments-field" style="display:none">'+
+      '<label>Comments & Work Files</label>'+
+      '<div id="wb-comments-list" style="margin-bottom:10px"></div>'+
+      '<div style="border:1px solid #E2E5E8;border-radius:8px;padding:10px;background:#F7F8FA">'+
+        '<textarea id="wb-comment-text" placeholder="Add a comment..." style="width:100%;border:none;background:transparent;font-size:13px;font-family:inherit;outline:none;resize:none;min-height:50px;color:#1A2228"></textarea>'+
+        '<div id="wb-comment-file-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between">'+
+          '<label style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1px solid #E2E5E8;background:#fff;color:#6B7A84;font-size:12px;cursor:pointer;font-family:inherit">'+
+            '&#128206; Attach<input type="file" id="wb-comment-file-input" multiple style="display:none" onchange="wbAddCommentFiles(this)"/>'+
+          '</label>'+
+          '<button onclick="wbSubmitComment()" style="padding:6px 16px;border-radius:8px;border:none;background:#F7931E;color:#fff;font-size:12px;cursor:pointer;font-weight:600;font-family:inherit">Post</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>',
     '<button class="btn btnd" id="wb-tdb" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Trash</button>',
     '<button class="btn" id="wb-tcb">Cancel</button><button class="btn btnp" id="wb-tsb2">Save</button>')+
   mkModal('wb-bm','wb-bmt','New task board',
@@ -716,6 +795,7 @@ window.wbSO=function(id){ sO=id; rAL(false); };
 
 window.oAT=function oAT(gid){
   tmM='add'; tmG=gid; tmI=null; sO=cu.id;
+  briefFilesStaging=[]; commentFilesStaging=[];
   g('wb-tmt').textContent='New task';
   g('wb-tn').value=''; g('wb-td').value=''; g('wb-tnotes').value='';
   pSS('todo',false); pPS('med'); rAL(false);
@@ -723,12 +803,17 @@ window.oAT=function oAT(gid){
   g('wb-tn').disabled=false; g('wb-tp').disabled=false;
   g('wb-td').disabled=false; g('wb-tnotes').disabled=false;
   g('wb-tsb2').style.display='inline-flex';
+  // Brief files visible, comments hidden for new task
+  g('wb-brief-files-field').style.display='';
+  g('wb-comments-field').style.display='none';
+  renderFilePreview([],'wb-brief-preview','wbRemoveBriefFile');
   openM('wb-tm');
 };
 
 window.wbET=function(itemId){
   var item=find(itemId); if(!item) return;
   tmM='edit'; tmI=item; tmG=null; sO=item.ownerId||cu.id;
+  briefFilesStaging=[]; commentFilesStaging=[];
   g('wb-tmt').textContent='Edit task';
   g('wb-tn').value=item.name;
   g('wb-td').value=item.due||'';
@@ -744,6 +829,21 @@ window.wbET=function(itemId){
   rAL(!isCreator);
   g('wb-tdb').style.display=isCreator?'inline-flex':'none';
   g('wb-tsb2').style.display=(isAssigned||isCreator)?'inline-flex':'none';
+  // Brief files: show saved files for creator, read-only for others
+  g('wb-brief-files-field').style.display='';
+  var bp=g('wb-brief-preview');
+  if(bp){
+    bp.innerHTML=(item.briefFiles&&item.briefFiles.length)?renderSavedFiles(item.briefFiles):'<span style="font-size:12px;color:#9CA3AF">No brief files attached.</span>';
+  }
+  // Hide upload button for non-creators
+  var briefUploadBtn=g('wb-brief-files-field').querySelector('label:last-of-type');
+  if(briefUploadBtn) briefUploadBtn.style.display=isCreator?'inline-flex':'none';
+  // Comments: always visible in edit mode
+  g('wb-comments-field').style.display='';
+  // Hide comment input for non-assigned and non-creator
+  var commentInput=g('wb-comments-field').querySelector('div:last-child');
+  if(commentInput) commentInput.style.display=(isAssigned||isCreator)?'':'none';
+  renderComments(item.comments||[]);
   openM('wb-tm');
 };
 
@@ -751,7 +851,7 @@ function svT(){
   var name=g('wb-tn').value.trim(); if(!name) return;
   var st=g('wb-ts').value, pr=g('wb-tp').value, due=g('wb-td').value, notes=g('wb-tnotes').value;
   if(tmM==='add'){
-    var newItem={id:uid(),name:name,status:st,priority:pr,ownerId:sO,assignedBy:cu.id,due:due,notes:notes};
+    var newItem={id:uid(),name:name,status:st,priority:pr,ownerId:sO,assignedBy:cu.id,due:due,notes:notes,briefFiles:briefFilesStaging.slice(),comments:[]};
     for(var i=0;i<boards.length;i++)
       if(boards[i].id===getB().id)
         for(var j=0;j<boards[i].groups.length;j++)
@@ -765,13 +865,21 @@ function svT(){
         for(var k=0;k<boards[i].groups[j].items.length;k++){
           var it=boards[i].groups[j].items[k];
           if(it.id===prev.id){
-            if(isCreator){ it.name=name; it.priority=pr; it.ownerId=sO; it.due=due; it.notes=notes; }
+            if(isCreator){
+              it.name=name; it.priority=pr; it.ownerId=sO; it.due=due; it.notes=notes;
+              // Merge new brief files with existing
+              if(briefFilesStaging.length){
+                if(!it.briefFiles) it.briefFiles=[];
+                for(var x=0;x<briefFilesStaging.length;x++) it.briefFiles.push(briefFilesStaging[x]);
+              }
+            }
             if(isAssigned){ it.status=st; }
             if(prev.status!=='done'&&it.status==='done') pshN(it,cu.id);
             break;
           }
         }
   }
+  briefFilesStaging=[];
   fbSave(); closeM('wb-tm'); rAll();
 }
 
@@ -1168,6 +1276,97 @@ function rNP(){
   }
   l.innerHTML=h;
 }
+
+// ── FILE UPLOAD HELPERS ───────────────────────────────────────
+window.wbAddBriefFiles=function(input){
+  var files=input.files; if(!files||!files.length) return;
+  var toRead=files.length, done=0;
+  for(var i=0;i<files.length;i++){
+    (function(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        briefFilesStaging.push({name:file.name,data:e.target.result});
+        done++;
+        if(done===toRead) renderFilePreview(briefFilesStaging,'wb-brief-preview','wbRemoveBriefFile');
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+  input.value='';
+};
+window.wbRemoveBriefFile=function(idx){
+  briefFilesStaging.splice(idx,1);
+  renderFilePreview(briefFilesStaging,'wb-brief-preview','wbRemoveBriefFile');
+};
+window.wbAddCommentFiles=function(input){
+  var files=input.files; if(!files||!files.length) return;
+  var toRead=files.length, done=0;
+  for(var i=0;i<files.length;i++){
+    (function(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        commentFilesStaging.push({name:file.name,data:e.target.result});
+        done++;
+        if(done===toRead) renderFilePreview(commentFilesStaging,'wb-comment-file-preview','wbRemoveCommentFile');
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+  input.value='';
+};
+window.wbRemoveCommentFile=function(idx){
+  commentFilesStaging.splice(idx,1);
+  renderFilePreview(commentFilesStaging,'wb-comment-file-preview','wbRemoveCommentFile');
+};
+window.wbSubmitComment=function(){
+  var text=g('wb-comment-text').value.trim();
+  if(!text&&!commentFilesStaging.length) return;
+  if(!tmI) return;
+  var comment={id:uid(),userId:cu.id,text:text,files:commentFilesStaging.slice(),ts:Date.now()};
+  // Find and update item in boards
+  for(var i=0;i<boards.length;i++)
+    for(var j=0;j<boards[i].groups.length;j++)
+      for(var k=0;k<boards[i].groups[j].items.length;k++)
+        if(boards[i].groups[j].items[k].id===tmI.id){
+          if(!boards[i].groups[j].items[k].comments) boards[i].groups[j].items[k].comments=[];
+          boards[i].groups[j].items[k].comments.push(comment);
+          tmI=boards[i].groups[j].items[k];
+          break;
+        }
+  commentFilesStaging=[];
+  g('wb-comment-text').value='';
+  renderFilePreview([],'wb-comment-file-preview','wbRemoveCommentFile');
+  fbSave();
+  renderComments(tmI.comments||[]);
+};
+
+function renderComments(comments){
+  var c=g('wb-comments-list'); if(!c) return;
+  if(!comments||!comments.length){
+    c.innerHTML='<div style="font-size:12px;color:#9CA3AF;padding:4px 0">No comments yet.</div>';
+    return;
+  }
+  var h='';
+  for(var i=0;i<comments.length;i++){
+    var cm=comments[i];
+    var u=null; for(var j=0;j<TM.length;j++) if(TM[j].id===cm.userId){u=TM[j];break;}
+    var time=new Date(cm.ts).toLocaleDateString('en',{month:'short',day:'numeric'})+' '+new Date(cm.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    h+='<div style="display:flex;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #F2F3F5">'+
+      av(u?u.id:'',28)+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
+          '<span style="font-size:13px;font-weight:700;color:#1A2228">'+(u?u.name:'Unknown')+'</span>'+
+          '<span style="font-size:11px;color:#9CA3AF">'+time+'</span>'+
+        '</div>'+
+        (cm.text?'<div style="font-size:13px;color:#3D4F5C;line-height:1.6;margin-bottom:6px">'+cm.text+'</div>':'')+
+        renderSavedFiles(cm.files||[])+
+      '</div>'+
+    '</div>';
+  }
+  c.innerHTML=h;
+}
+
+// ── FILE UPLOAD HELPERS END ───────────────────────────────────
 
 // ── CHANGE PASSWORD ───────────────────────────────────────────
 window.wbOpenChangePW=function(){

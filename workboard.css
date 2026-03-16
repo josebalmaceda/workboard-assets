@@ -74,6 +74,7 @@ input,select,textarea{font-family:inherit}
 .sb-item:hover{background:#F2F3F5;color:var(--navy)}
 .sb-item.active{background:var(--orange);color:#fff}
 .sb-item.active svg{stroke:#fff}
+.sb-item.active span{color:#fff!important}
 
 /* Sidebar footer */
 .sb-footer{

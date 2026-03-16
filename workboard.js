@@ -180,9 +180,9 @@ function buildHTML(){
         '<div id="wb-mtl"></div>'+
       '</div>'+
       '<div style="font-size:11px;color:#aaa;padding:10px 10px 4px;text-transform:uppercase">Navigation</div>'+
-      '<div class="sb-item" id="sbn-boards" onclick="setTab(\'boards\')"><span style="font-size:15px">📋</span> Tasks</div>'+
-      '<div class="sb-item" id="sbn-brand" onclick="setTab(\'brand\')"><span style="font-size:15px">🎨</span> Brand Kit</div>'+
-      '<div class="sb-item" id="sbn-trash" onclick="setTab(\'trash\')"><span style="font-size:15px">🗑️</span> Trash</div>'+
+      '<div class="sb-item" id="sbn-boards" onclick="setTab(\'boards\')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Tasks</div>'+
+      '<div class="sb-item" id="sbn-brand" onclick="setTab(\'brand\')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M6.17 18a6 6 0 0 1 11.66 0"/></svg> Brand Kit</div>'+
+      '<div class="sb-item" id="sbn-trash" onclick="setTab(\'trash\')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Trash</div>'+
       '<div style="font-size:11px;color:#aaa;padding:10px 10px 4px;text-transform:uppercase;margin-top:4px">Task Boards</div>'+
       '<div id="wb-bl"></div>'+
       '<div class="sb-item" id="wb-nbb" style="color:#aaa"><span style="font-size:16px">+</span> New task board</div>'+
@@ -193,7 +193,7 @@ function buildHTML(){
         '<button class="btn" style="padding:5px 8px;font-size:16px" id="wb-tsb">&#9776;</button>'+
         '<div id="wb-bcd" style="width:12px;height:12px;border-radius:3px;flex-shrink:0"></div>'+
         '<h1 id="wb-bt">Board</h1>'+
-        '<div style="position:relative" id="wb-bell-btn"><button class="btn" style="padding:5px 10px" id="wb-bellt">&#128276;</button><div id="wb-bdot"></div></div>'+
+        '<div style="position:relative" id="wb-bell-btn"><button class="btn" style="padding:5px 10px" id="wb-bellt"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button><div id="wb-bdot"></div></div>'+
         '<button class="btn" id="wb-ebb" style="display:none">Edit</button>'+
         '<button class="btn btnp" id="wb-atb" style="display:none">+ Add task</button>'+
       '</div>'+
@@ -258,7 +258,7 @@ function buildHTML(){
       '<div class="wb-field"><label>Due date</label><input type="date" id="wb-td"/></div>'+
     '</div>'+
     '<div class="wb-field"><label>Notes</label><textarea id="wb-tnotes" placeholder="Add notes..."></textarea></div>',
-    '<button class="btn btnd" id="wb-tdb" style="display:none">&#128465; Trash</button>',
+    '<button class="btn btnd" id="wb-tdb" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Trash</button>',
     '<button class="btn" id="wb-tcb">Cancel</button><button class="btn btnp" id="wb-tsb2">Save</button>')+
   // BOARD MODAL
   mkModal('wb-bm','wb-bmt','New board',
@@ -476,8 +476,12 @@ function rSB(){
   var u=cu;
   g('wb-sbu').innerHTML=av(u.id,32)+
     '<span style="font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+u.name+'</span>'+
-    '<button onclick="wbOpenChangePW()" title="Change password" style="background:none;border:none;font-size:14px;cursor:pointer;color:#aaa;padding:2px 4px">&#128274;</button>'+
-    '<button onclick="wbLO()" style="background:none;border:none;font-size:14px;cursor:pointer;color:#aaa" title="Sign out">&#8644;</button>';
+    '<button onclick="wbOpenChangePW()" title="Change password" style="background:none;border:none;cursor:pointer;color:#aaa;padding:2px 4px;display:flex;align-items:center">'+
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'+
+    '</button>'+
+    '<button onclick="wbLO()" title="Sign out" style="background:none;border:none;cursor:pointer;color:#aaa;padding:2px 4px;display:flex;align-items:center">'+
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'+
+    '</button>';
   var mt=[];
   for(var i=0;i<boards.length;i++)
     for(var j=0;j<boards[i].groups.length;j++)
@@ -513,7 +517,11 @@ function rC(){
   if(g('wb-bt')) g('wb-bt').textContent=b?b.name:'Board';
   if(g('wb-bcd')) g('wb-bcd').style.background=b?b.color:'transparent';
   if(!b){
-    c.innerHTML='<div class="wb-empty"><div style="font-size:40px">📋</div><div style="font-size:16px;font-weight:500">No task boards yet</div><button class="btn btnp" onclick="oAB()">+ Create task board</button></div>';
+    c.innerHTML='<div class="wb-empty">'+
+      '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'+
+      '<div style="font-size:16px;font-weight:500">No task boards yet</div>'+
+      '<button class="btn btnp" onclick="oAB()">+ Create task board</button>'+
+    '</div>';
     return;
   }
   if(view==='kanban'){ rKan(b,c); return; }
@@ -643,7 +651,11 @@ window.wbCopyColor=function(hex){
 // ── TRASH ─────────────────────────────────────────────────────
 function rTrash(c){
   if(!trash.length){
-    c.innerHTML='<div class="wb-empty"><div style="font-size:40px">&#128465;</div><div style="font-size:16px;font-weight:500">Trash is empty</div><div style="font-size:13px;color:#888">Deleted tasks will appear here for 30 days</div></div>';
+    c.innerHTML='<div class="wb-empty">'+
+      '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>'+
+      '<div style="font-size:16px;font-weight:500">Trash is empty</div>'+
+      '<div style="font-size:13px;color:#888">Deleted tasks will appear here for 30 days</div>'+
+    '</div>';
     return;
   }
   var h='<div style="padding:4px 0">'+
@@ -1076,7 +1088,9 @@ function rNP(){
   for(var i=0;i<nh.length;i++){
     var n=nh[i],a=null; for(var j=0;j<TM.length;j++) if(TM[j].id===n.assigneeId){ a=TM[j]; break; }
     h+='<div style="padding:12px 16px;border-bottom:1px solid #f5f5f5;display:flex;gap:12px;align-items:flex-start;background:'+(n.read?'#fff':'#f8f8ff')+'">'+
-      '<div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#10003;</div>'+
+      '<div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+      '</div>'+
       '<div style="flex:1"><div style="font-size:12px;color:#444;line-height:1.6"><strong style="color:'+(a?a.color:'#333')+'">'+(a?a.name:'Someone')+'</strong> completed <strong>"'+n.taskName+'"</strong></div>'+
       '<div style="font-size:11px;color:#aaa;margin-top:3px">'+new Date(n.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div></div>'+
       (!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:#7F77DD;margin-top:4px;flex-shrink:0"></div>':'')+

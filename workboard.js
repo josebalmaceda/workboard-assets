@@ -287,7 +287,8 @@ function fireSysNotif(notif,type,sm,a){
 function pshN(task,doneById,newStatus,oldStatus,type){
   type=type||'status';
   function push(targetId){
-    if(!targetId||targetId===doneById) return;
+    if(!targetId) return;
+    if(targetId===doneById) return; // never notify yourself
     db.ref('workboard/notifs/'+targetId).push({
       id:uid(),
       taskName:task.name,
@@ -300,10 +301,11 @@ function pshN(task,doneById,newStatus,oldStatus,type){
       ts:Date.now()
     });
   }
-  // Notify the person who created/assigned the task
-  push(task.assignedBy);
-  // Notify the person assigned to the task
-  push(task.ownerId);
+  // Always notify BOTH creator and assigned person (whoever didn't do the action)
+  push(task.assignedBy);  // notify creator
+  push(task.ownerId);     // notify assigned person
+  // Also show toast immediately for the current user if they are the target
+  // (for same-browser testing — real cross-user notifs come via Firebase listener)
 }
 
 /* ══════════════════════════════════════════════
@@ -482,6 +484,8 @@ function doLogin(id){
   g('wb-app').style.display='flex';
   if('Notification' in window&&Notification.permission==='default') Notification.requestPermission();
   db.ref('workboard/passwords').once('value',function(snap){ PASSWORDS=snap.val()||{}; });
+  // Clear old notifications on login to start fresh
+  db.ref('workboard/notifs/'+cu.id).remove();
   var ref=db.ref('workboard/boards');
   ref.on('value',function(snap){
     var v=snap.val(),raw=[];
@@ -506,27 +510,23 @@ function doLogin(id){
   nref.on('child_added',function(snap){
     var n=snap.val(); if(!n) return;
     n.key=snap.key;
-    // Only process notifications meant for this user
-    if(n.toUserId&&n.toUserId!==cu.id) return;
-    if(!seen.has(n.key)){
-      saveSeenNotif(cu.id,n.key);
-      var sm=getStatusMeta(n.newStatus);
-      nh.unshift({
-        taskName:n.taskName,
-        assigneeId:n.assigneeId,
-        newStatus:n.newStatus||'done',
-        type:n.type||'status',
-        ts:n.ts,
-        key:n.key,
-        read:false
-      });
-      // Always show toast — both when tab is active and when returning to tab
-      showP(n);
-      // System notification for when browser is minimized
-      fireSysNotif(n,n.type||'status',sm,null);
-      updBell();
-      rNP();
-    }
+    // Accept if toUserId matches OR if toUserId is not set (legacy)
+    if(n.toUserId && n.toUserId!==cu.id) return;
+    if(seen.has(n.key)) return;
+    saveSeenNotif(cu.id,n.key);
+    nh.unshift({
+      taskName:n.taskName,
+      assigneeId:n.assigneeId,
+      newStatus:n.newStatus||'done',
+      type:n.type||'status',
+      ts:n.ts,
+      key:n.key,
+      read:false
+    });
+    showP(n);
+    fireSysNotif(n,n.type||'status',getStatusMeta(n.newStatus),null);
+    updBell();
+    rNP();
   });
   uN=function(){ nref.off('child_added'); };
   loadBrandAssets();

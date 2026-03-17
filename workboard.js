@@ -362,7 +362,6 @@ function buildHTML(){
         '<div style="position:relative" id="wb-bell-btn"><button class="btn" style="padding:5px 10px" id="wb-bellt"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button><div id="wb-bdot"></div></div>'+
         '<button class="btn" id="wb-ebb" style="display:none">Edit</button>'+
         '<button class="btn btnp" id="wb-atb" style="display:none">+ Add task</button>'+
-        '<button onclick="window.showToast({title:\'Test\',msg:\'Toasts are working!\',color:\'#F7931E\',icon:\'\'})" style="padding:4px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;font-size:11px;cursor:pointer;color:#6B7A84;font-family:inherit" id="wb-test-toast">Test toast</button>'+
       '</div>'+
       '<div id="wb-toolbar" style="display:none">'+
         '<button class="vbtn active" id="wb-vb">Table</button>'+

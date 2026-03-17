@@ -288,9 +288,21 @@ function pshN(task,doneById,newStatus,oldStatus,type){
   type=type||'status';
   function push(targetId){
     if(!targetId||targetId===doneById) return;
-    db.ref('workboard/notifs/'+targetId).push({id:uid(),taskName:task.name,assigneeId:doneById,toUserId:targetId,taskId:task.id,newStatus:newStatus||'done',oldStatus:oldStatus||'',type:type,ts:Date.now()});
+    db.ref('workboard/notifs/'+targetId).push({
+      id:uid(),
+      taskName:task.name,
+      assigneeId:doneById,
+      toUserId:targetId,
+      taskId:task.id,
+      newStatus:newStatus||'done',
+      oldStatus:oldStatus||'',
+      type:type,
+      ts:Date.now()
+    });
   }
+  // Notify the person who created/assigned the task
   push(task.assignedBy);
+  // Notify the person assigned to the task
   push(task.ownerId);
 }
 
@@ -492,14 +504,28 @@ function doLogin(id){
   uT=function(){ tref.off('value'); };
   var nref=db.ref('workboard/notifs/'+cu.id);
   nref.on('child_added',function(snap){
-    var n=snap.val(); n.key=snap.key;
+    var n=snap.val(); if(!n) return;
+    n.key=snap.key;
+    // Only process notifications meant for this user
     if(n.toUserId&&n.toUserId!==cu.id) return;
     if(!seen.has(n.key)){
       saveSeenNotif(cu.id,n.key);
       var sm=getStatusMeta(n.newStatus);
-      nh.unshift({taskName:n.taskName,assigneeId:n.assigneeId,message:n.message||'',newStatus:n.newStatus||'done',type:n.type||'status',ts:n.ts,key:n.key,read:false});
+      nh.unshift({
+        taskName:n.taskName,
+        assigneeId:n.assigneeId,
+        newStatus:n.newStatus||'done',
+        type:n.type||'status',
+        ts:n.ts,
+        key:n.key,
+        read:false
+      });
+      // Always show toast — both when tab is active and when returning to tab
       showP(n);
+      // System notification for when browser is minimized
+      fireSysNotif(n,n.type||'status',sm,null);
       updBell();
+      rNP();
     }
   });
   uN=function(){ nref.off('child_added'); };
@@ -754,7 +780,11 @@ function svT(){
       var it=boards[i].groups[j].items[k];
       if(it.id===prev.id){
         if(isCreator){ it.name=name; it.priority=pr; it.ownerId=sO; it.due=due; it.notes=notes; if(briefFilesStaging.length){ if(!it.briefFiles) it.briefFiles=[]; for(var x=0;x<briefFilesStaging.length;x++) it.briefFiles.push(briefFilesStaging[x]); } }
-        if(isAssigned&&it.status!==prev.status){ it.status=st; pshN(it,cu.id,st,prev.status,'status'); } else if(isAssigned) it.status=st;
+        if(isAssigned){ it.status=st; }
+        // Fire notification if status changed
+        if(it.status!==prev.status){
+          pshN(it,cu.id,it.status,prev.status,'status');
+        }
         break;
       }
     }

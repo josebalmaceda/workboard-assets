@@ -481,10 +481,21 @@ function doLogin(id){
   g('wb-app').style.display='flex';
   if('Notification' in window&&Notification.permission==='default') Notification.requestPermission();
   db.ref('workboard/passwords').once('value',function(snap){ PASSWORDS=snap.val()||{}; });
-  // Clear old notifications and seen cache on each login so nothing is missed
+  // Clean up notifications older than 30 days
+  db.ref('workboard/notifs/'+cu.id).once('value',function(snap){
+    var v=snap.val(); if(!v) return;
+    var cutoff=Date.now()-30*24*60*60*1000;
+    var keys=Object.keys(v);
+    for(var i=0;i<keys.length;i++){
+      if(v[keys[i]]&&v[keys[i]].ts&&v[keys[i]].ts<cutoff){
+        db.ref('workboard/notifs/'+cu.id+'/'+keys[i]).remove();
+      }
+    }
+  });
+  // Load seen keys from localStorage but do NOT clear Firebase notifs on login
+  // so missed notifications are always available when reopening the app
   seen=new Set();
-  db.ref('workboard/notifs/'+cu.id).remove();
-  localStorage.removeItem('wb_seen_'+cu.id);
+  loadSeenNotifs(cu.id);
   var ref=db.ref('workboard/boards');
   ref.on('value',function(snap){
     var v=snap.val(),raw=[];
@@ -507,14 +518,18 @@ function doLogin(id){
     if(activeTab==='trash') rC();
   });
   uT=function(){ tref.off('value'); };
+  // Track login time so we know which notifs are "new" vs "missed"
+  var loginTime=Date.now();
   var nref=db.ref('workboard/notifs/'+cu.id);
   nref.on('child_added',function(snap){
     var n=snap.val(); if(!n) return;
     n.key=snap.key;
-    // Accept if toUserId matches OR if toUserId is not set (legacy)
-    if(n.toUserId && n.toUserId!==cu.id) return;
+    if(n.toUserId&&n.toUserId!==cu.id) return;
     if(seen.has(n.key)) return;
-    saveSeenNotif(cu.id,n.key);
+    var isMissed=(n.ts<loginTime-2000);
+    // For missed notifs: add to bell as UNREAD but don't mark as seen yet
+    // For new notifs: mark as seen immediately and show toast
+    if(!isMissed) saveSeenNotif(cu.id,n.key);
     nh.unshift({
       taskName:n.taskName,
       assigneeId:n.assigneeId,
@@ -522,10 +537,13 @@ function doLogin(id){
       type:n.type||'status',
       ts:n.ts,
       key:n.key,
-      read:false
+      read:false // always unread until user opens bell
     });
-    showP(n);
-    fireSysNotif(n,n.type||'status',getStatusMeta(n.newStatus),null);
+    if(!isMissed){
+      seen.add(n.key);
+      showP(n);
+      fireSysNotif(n,n.type||'status',getStatusMeta(n.newStatus),null);
+    }
     updBell();
     rNP();
   });
@@ -829,7 +847,18 @@ function rCP(cid,vn,sel){ var h=''; for(var i=0;i<CL.length;i++) h+='<div class=
 window.wbPC=function(cid,vn,c){ if(vn==='sBC') sBC=c; if(vn==='sGC') sGC=c; var sw=document.querySelectorAll('#'+cid+' .cs'); for(var i=0;i<sw.length;i++) sw[i].classList.toggle('sel',sw[i].style.background===c||sw[i].style.backgroundColor===c); };
 
 /* ── Notification bell ── */
-function tNP(){ g('wb-np').classList.toggle('open'); if(g('wb-np').classList.contains('open')){ for(var i=0;i<nh.length;i++) nh[i].read=true; updBell(); rNP(); } }
+function tNP(){
+  g('wb-np').classList.toggle('open');
+  if(g('wb-np').classList.contains('open')){
+    // Mark all as read and save to seen so they don't reappear
+    for(var i=0;i<nh.length;i++){
+      nh[i].read=true;
+      saveSeenNotif(cu.id,nh[i].key);
+    }
+    updBell();
+    rNP();
+  }
+}
 function updBell(){ var u=0; for(var i=0;i<nh.length;i++) if(!nh[i].read) u++; g('wb-bdot').style.display=u?'block':'none'; }
 function rNP(){
   var l=g('wb-npl');

@@ -286,29 +286,22 @@ function fireSysNotif(notif,type,sm,a){
 
 function pshN(task,doneById,newStatus,oldStatus,type){
   type=type||'status';
-  function push(targetId){
-    if(!targetId) return;
-    if(targetId===doneById) return;
-    db.ref('workboard/notifs/'+targetId).push({
-      id:uid(),taskName:task.name,assigneeId:doneById,
-      toUserId:targetId,taskId:task.id,
-      newStatus:newStatus||'done',oldStatus:oldStatus||'',
-      type:type,ts:Date.now()
+  var targets=[];
+  // Collect all unique people involved except the one who did the action
+  if(task.assignedBy && task.assignedBy!==doneById && targets.indexOf(task.assignedBy)===-1) targets.push(task.assignedBy);
+  if(task.ownerId && task.ownerId!==doneById && targets.indexOf(task.ownerId)===-1) targets.push(task.ownerId);
+  for(var i=0;i<targets.length;i++){
+    db.ref('workboard/notifs/'+targets[i]).push({
+      id:uid(),
+      taskName:task.name,
+      assigneeId:doneById,
+      toUserId:targets[i],
+      taskId:task.id,
+      newStatus:newStatus||'done',
+      oldStatus:oldStatus||'',
+      type:type,
+      ts:Date.now()
     });
-  }
-  // If assigned person marks done → notify creator
-  // If creator marks done → notify assigned person
-  // They are different people so both get notified correctly
-  if(doneById===task.ownerId){
-    // Assigned person did it — notify creator
-    push(task.assignedBy);
-  } else if(doneById===task.assignedBy){
-    // Creator did it — notify assigned person
-    push(task.ownerId);
-  } else {
-    // Someone else — notify both
-    push(task.assignedBy);
-    push(task.ownerId);
   }
 }
 
@@ -488,8 +481,10 @@ function doLogin(id){
   g('wb-app').style.display='flex';
   if('Notification' in window&&Notification.permission==='default') Notification.requestPermission();
   db.ref('workboard/passwords').once('value',function(snap){ PASSWORDS=snap.val()||{}; });
-  // Clear old notifications on login to start fresh
+  // Clear old notifications and seen cache on each login so nothing is missed
+  seen=new Set();
   db.ref('workboard/notifs/'+cu.id).remove();
+  localStorage.removeItem('wb_seen_'+cu.id);
   var ref=db.ref('workboard/boards');
   ref.on('value',function(snap){
     var v=snap.val(),raw=[];
@@ -785,11 +780,12 @@ function svT(){
     for(var i=0;i<boards.length;i++) for(var j=0;j<boards[i].groups.length;j++) for(var k=0;k<boards[i].groups[j].items.length;k++){
       var it=boards[i].groups[j].items[k];
       if(it.id===prev.id){
+        var prevStatus=prev.status;
         if(isCreator){ it.name=name; it.priority=pr; it.ownerId=sO; it.due=due; it.notes=notes; if(briefFilesStaging.length){ if(!it.briefFiles) it.briefFiles=[]; for(var x=0;x<briefFilesStaging.length;x++) it.briefFiles.push(briefFilesStaging[x]); } }
         if(isAssigned){ it.status=st; }
-        // Fire notification if status changed
-        if(it.status!==prev.status){
-          pshN(it,cu.id,it.status,prev.status,'status');
+        // Notify if status changed — regardless of who changed it
+        if(it.status!==prevStatus){
+          pshN(it,cu.id,it.status,prevStatus,'status');
         }
         break;
       }

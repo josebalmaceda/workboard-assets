@@ -285,8 +285,7 @@ function buildHTML(){
       '<div id="wb-content"></div>'+
     '</div>'+
   '</div>'+
-  // Toast container
-  '<div id="wb-toast-container" style="position:fixed;bottom:24px;right:24px;z-index:400000;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:340px"></div>'+
+  '<div id="wb-notif-popup">'+
     '<div style="height:5px;background:linear-gradient(90deg,#F7931E,#EF5601)"></div>'+
     '<div style="padding:16px 18px 18px">'+
       '<div style="display:flex;align-items:flex-start;gap:14px">'+
@@ -873,8 +872,6 @@ function svT(){
       if(boards[i].id===getB().id)
         for(var j=0;j<boards[i].groups.length;j++)
           if(boards[i].groups[j].id===tmG){ boards[i].groups[j].items.unshift(newItem); break; }
-    // Notify assigned person
-    if(sO!==cu.id) pshN(newItem,cu.id,'','','assigned');
   } else {
     var prev=tmI;
     var isAssigned=prev.ownerId===cu.id;
@@ -937,19 +934,24 @@ window.wbQD=function(itemId){
   fbSave(); rAll();
 };
 
-function pshN(task,doneById,newStatus,oldStatus,type){
+function pshN(task,doneById,newStatus,oldStatus){
   var doerName='Someone';
   for(var i=0;i<TM.length;i++) if(TM[i].id===doneById){ doerName=TM[i].name; break; }
   var statusLabel=newStatus||'done';
   for(var i=0;i<ST.length;i++) if(ST[i].v===statusLabel){ statusLabel=ST[i].l; break; }
-  type=type||'status';
+
   function push(targetId){
     if(!targetId||targetId===doneById) return;
     db.ref('workboard/notifs/'+targetId).push({
-      id:uid(),taskName:task.name,assigneeId:doneById,
-      toUserId:targetId,taskId:task.id,
-      newStatus:newStatus||'done',oldStatus:oldStatus||'',
-      type:type,ts:Date.now()
+      id:uid(),
+      taskName:task.name,
+      assigneeId:doneById,
+      toUserId:targetId,
+      taskId:task.id,
+      newStatus:newStatus||'done',
+      oldStatus:oldStatus||'',
+      message:doerName+' changed "'+task.name+'" to '+statusLabel,
+      ts:Date.now()
     });
   }
   push(task.assignedBy);
@@ -1411,8 +1413,6 @@ window.wbSubmitComment=function(){
           tmI=boards[i].groups[j].items[k];
           break;
         }
-  // Notify creator and assignee about comment
-  pshN(tmI,cu.id,tmI.status,'','comment');
   commentFilesStaging=[];
   g('wb-comment-text').value='';
   renderFilePreview([],'wb-comment-file-preview','wbRemoveCommentFile');

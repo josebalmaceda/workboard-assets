@@ -440,6 +440,11 @@ function doLogin(id){
   g('wb-login').style.display='none';
   g('wb-app').style.display='flex';
 
+  // Request browser notification permission
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+
   db.ref('workboard/passwords').once('value',function(snap){ var v=snap.val()||{}; PASSWORDS=v; });
 
   var ref=db.ref('workboard/boards');
@@ -476,8 +481,19 @@ function doLogin(id){
     if(n.toUserId&&n.toUserId!==cu.id) return;
     if(!seen.has(n.key)){
       saveSeenNotif(cu.id,n.key);
-      nh.unshift({taskName:n.taskName,assigneeId:n.assigneeId,ts:n.ts,key:n.key,read:false});
-      if(!document.hidden) showP(n);
+      nh.unshift({
+        taskName:n.taskName,
+        assigneeId:n.assigneeId,
+        message:n.message||'',
+        newStatus:n.newStatus||'done',
+        ts:n.ts,
+        key:n.key,
+        read:false
+      });
+      // In-app popup (always)
+      showP(n);
+      // System notification (works when minimized)
+      fireSysNotif(n);
       updBell();
     }
   });
@@ -874,7 +890,9 @@ function svT(){
               }
             }
             if(isAssigned){ it.status=st; }
-            if(prev.status!=='done'&&it.status==='done') pshN(it,cu.id);
+            if(isAssigned && it.status!==prev.status){
+              pshN(it,cu.id,it.status,prev.status);
+            }
             break;
           }
         }
@@ -904,22 +922,40 @@ function moveToTrash(){
 
 window.wbQD=function(itemId){
   var item=find(itemId); if(!item||item.ownerId!==cu.id) return;
+  var oldStatus=item.status;
   for(var i=0;i<boards.length;i++)
     for(var j=0;j<boards[i].groups.length;j++)
       for(var k=0;k<boards[i].groups[j].items.length;k++)
         if(boards[i].groups[j].items[k].id===itemId){
           boards[i].groups[j].items[k].status='done';
-          pshN(boards[i].groups[j].items[k],cu.id);
+          pshN(boards[i].groups[j].items[k],cu.id,'done',oldStatus);
           break;
         }
   fbSave(); rAll();
 };
 
-function pshN(task,doneById){
-  if(task.assignedBy&&task.assignedBy!==doneById)
-    db.ref('workboard/notifs/'+task.assignedBy).push({id:uid(),taskName:task.name,assigneeId:doneById,toUserId:task.assignedBy,taskId:task.id,ts:Date.now()});
-  if(task.ownerId&&task.ownerId!==doneById)
-    db.ref('workboard/notifs/'+task.ownerId).push({id:uid(),taskName:task.name,assigneeId:doneById,toUserId:task.ownerId,taskId:task.id,ts:Date.now()});
+function pshN(task,doneById,newStatus,oldStatus){
+  var doerName='Someone';
+  for(var i=0;i<TM.length;i++) if(TM[i].id===doneById){ doerName=TM[i].name; break; }
+  var statusLabel=newStatus||'done';
+  for(var i=0;i<ST.length;i++) if(ST[i].v===statusLabel){ statusLabel=ST[i].l; break; }
+
+  function push(targetId){
+    if(!targetId||targetId===doneById) return;
+    db.ref('workboard/notifs/'+targetId).push({
+      id:uid(),
+      taskName:task.name,
+      assigneeId:doneById,
+      toUserId:targetId,
+      taskId:task.id,
+      newStatus:newStatus||'done',
+      oldStatus:oldStatus||'',
+      message:doerName+' changed "'+task.name+'" to '+statusLabel,
+      ts:Date.now()
+    });
+  }
+  push(task.assignedBy);
+  push(task.ownerId);
 }
 
 // ── BOARD ─────────────────────────────────────────────────────
@@ -1236,14 +1272,48 @@ function loadBrandAssets(){
 // ── NOTIFICATIONS ─────────────────────────────────────────────
 function showP(notif){
   var a=null; for(var i=0;i<TM.length;i++) if(TM[i].id===notif.assigneeId){ a=TM[i]; break; }
-  g('wb-nm').innerHTML='<span style="font-weight:700;color:'+(a?a.color:'#38444E')+'">'+(a?a.name:'Someone')+'</span> marked <strong>"'+notif.taskName+'"</strong> as done.';
+  var statusLabel=notif.newStatus||'done';
+  for(var i=0;i<ST.length;i++) if(ST[i].v===statusLabel){ statusLabel=ST[i].l; break; }
+  var statusColor='#1D7A4E';
+  for(var i=0;i<ST.length;i++) if(ST[i].v===(notif.newStatus||'done')){ statusColor=ST[i].d; break; }
+
+  // Update popup icon color to match status
+  var iconEl=g('wb-notif-popup').querySelector('div[style*="border-radius:50%"]');
+  if(iconEl){ iconEl.style.background=statusColor+'22'; iconEl.querySelector('svg').style.stroke=statusColor; }
+
+  g('wb-nm').innerHTML=
+    '<span style="font-weight:700;color:'+(a?a.color:'#38444E')+'">'+(a?a.name:'Someone')+'</span>'+
+    ' changed <strong>"'+notif.taskName+'"</strong> to '+
+    '<span style="font-weight:700;color:'+statusColor+'">'+statusLabel+'</span>';
+
   var pop=g('wb-notif-popup'), bar=g('wb-npb');
   pop.classList.add('show');
+  bar.style.background=statusColor;
   bar.style.animation='none'; bar.offsetHeight;
   bar.style.animation='wb-shrink 7s linear forwards';
   clearTimeout(pt); pt=setTimeout(wbHP,7000);
 }
+
 window.wbHP=function(){ g('wb-notif-popup').classList.remove('show'); };
+
+function fireSysNotif(notif){
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  var a=null; for(var i=0;i<TM.length;i++) if(TM[i].id===notif.assigneeId){ a=TM[i]; break; }
+  var statusLabel=notif.newStatus||'done';
+  for(var i=0;i<ST.length;i++) if(ST[i].v===statusLabel){ statusLabel=ST[i].l; break; }
+  try{
+    var sn=new Notification('WorkBoard — Task Update', {
+      body:(a?a.name:'Someone')+' changed "'+notif.taskName+'" to '+statusLabel,
+      icon:'https://josebalmaceda.github.io/workboard-assets/favicon.png',
+      tag:notif.key,
+      requireInteraction:false
+    });
+    sn.onclick=function(){
+      window.focus();
+      sn.close();
+    };
+  }catch(e){}
+}
 
 function tNP(){
   g('wb-np').classList.toggle('open');
@@ -1263,15 +1333,25 @@ function rNP(){
   for(var i=0;i<nh.length;i++){
     var n=nh[i], a=null;
     for(var j=0;j<TM.length;j++) if(TM[j].id===n.assigneeId){ a=TM[j]; break; }
+    var statusLabel=n.newStatus||'done';
+    var statusColor='#1D7A4E';
+    for(var j=0;j<ST.length;j++){
+      if(ST[j].v===statusLabel){ statusLabel=ST[j].l; statusColor=ST[j].d; break; }
+    }
+    var time=new Date(n.ts).toLocaleDateString('en',{month:'short',day:'numeric'})+' '+new Date(n.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     h+='<div style="padding:12px 16px;border-bottom:1px solid #F2F3F5;display:flex;gap:12px;align-items:flex-start;background:'+(n.read?'#fff':'#FFFBF5')+'">'+
-      '<div style="width:32px;height:32px;border-radius:50%;background:#D6F5E8;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D7A4E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+      '<div style="width:34px;height:34px;border-radius:50%;background:'+statusColor+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid '+statusColor+'44">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="'+statusColor+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
       '</div>'+
       '<div style="flex:1">'+
-        '<div style="font-size:12px;color:#3D4F5C;line-height:1.6"><strong style="color:'+(a?a.color:'#38444E')+'">'+(a?a.name:'Someone')+'</strong> completed <strong>"'+n.taskName+'"</strong></div>'+
-        '<div style="font-size:11px;color:#9CA3AF;margin-top:3px">'+new Date(n.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>'+
+        '<div style="font-size:12px;color:#3D4F5C;line-height:1.6">'+
+          '<strong style="color:'+(a?a.color:'#38444E')+'">'+(a?a.name:'Someone')+'</strong>'+
+          ' changed <strong>"'+n.taskName+'"</strong> to '+
+          '<strong style="color:'+statusColor+'">'+statusLabel+'</strong>'+
+        '</div>'+
+        '<div style="font-size:11px;color:#9CA3AF;margin-top:3px">'+time+'</div>'+
       '</div>'+
-      (!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:#F7931E;margin-top:4px;flex-shrink:0"></div>':'')+
+      (!n.read?'<div style="width:8px;height:8px;border-radius:50%;background:#F7931E;margin-top:6px;flex-shrink:0"></div>':'')+
     '</div>';
   }
   l.innerHTML=h;

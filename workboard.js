@@ -288,24 +288,28 @@ function pshN(task,doneById,newStatus,oldStatus,type){
   type=type||'status';
   function push(targetId){
     if(!targetId) return;
-    if(targetId===doneById) return; // never notify yourself
+    if(targetId===doneById) return;
     db.ref('workboard/notifs/'+targetId).push({
-      id:uid(),
-      taskName:task.name,
-      assigneeId:doneById,
-      toUserId:targetId,
-      taskId:task.id,
-      newStatus:newStatus||'done',
-      oldStatus:oldStatus||'',
-      type:type,
-      ts:Date.now()
+      id:uid(),taskName:task.name,assigneeId:doneById,
+      toUserId:targetId,taskId:task.id,
+      newStatus:newStatus||'done',oldStatus:oldStatus||'',
+      type:type,ts:Date.now()
     });
   }
-  // Always notify BOTH creator and assigned person (whoever didn't do the action)
-  push(task.assignedBy);  // notify creator
-  push(task.ownerId);     // notify assigned person
-  // Also show toast immediately for the current user if they are the target
-  // (for same-browser testing — real cross-user notifs come via Firebase listener)
+  // If assigned person marks done → notify creator
+  // If creator marks done → notify assigned person
+  // They are different people so both get notified correctly
+  if(doneById===task.ownerId){
+    // Assigned person did it — notify creator
+    push(task.assignedBy);
+  } else if(doneById===task.assignedBy){
+    // Creator did it — notify assigned person
+    push(task.ownerId);
+  } else {
+    // Someone else — notify both
+    push(task.assignedBy);
+    push(task.ownerId);
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -490,7 +494,9 @@ function doLogin(id){
   ref.on('value',function(snap){
     var v=snap.val(),raw=[];
     if(!v){ raw=[]; } else if(Array.isArray(v)){ raw=v; } else { var k=Object.keys(v); for(var i=0;i<k.length;i++) raw.push(v[k[i]]); }
-    boards=sanitizeBoards(raw);
+    var freshBoards=sanitizeBoards(raw);
+    // Always update and re-render on any Firebase change
+    boards=freshBoards;
     if(!abid&&boards.length) abid=boards[0].id;
     rAll();
   });

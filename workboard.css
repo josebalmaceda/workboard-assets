@@ -160,6 +160,25 @@ input,select,textarea{font-family:inherit}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:#b0b8c0}
 
+/* ── Bell animation ── */
+@keyframes wb-bell-ring{
+  0%  {transform:rotate(0)}
+  10% {transform:rotate(14deg)}
+  20% {transform:rotate(-12deg)}
+  30% {transform:rotate(10deg)}
+  40% {transform:rotate(-8deg)}
+  50% {transform:rotate(6deg)}
+  60% {transform:rotate(-4deg)}
+  70% {transform:rotate(2deg)}
+  80% {transform:rotate(0)}
+  100%{transform:rotate(0)}
+}
+#wb-bellt.ringing{
+  animation:wb-bell-ring .7s ease forwards;
+  transform-origin:top center;
+}
+#wb-bellt.ringing svg{stroke:#F7931E}
+
 /* ── Password screen ── */
 #wb-pw-screen{background:rgba(26,34,40,.55)!important}
 
